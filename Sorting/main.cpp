@@ -15,7 +15,7 @@ int main() {
     // seed random number generator to get different random numbers each time
     srand(time(nullptr));
 
-    int testSizes[] = {1000, 10000, 25000, 50000, 100000};
+    int testSizes[] = {1000, 10000, 25000, 50000, 75000, 100000};
 
     for (int size : testSizes) {
         cout << "Testing size: " << size << endl;
@@ -89,7 +89,7 @@ void measureRuntime(int size) {
     start = clock();
     bubbleSort(arrCopy, size);
     end = clock();
-    cpu_time_used = (((double) (end - start)) / CLOCKS_PER_SEC) * 1000;
+    cpu_time_used = (((double)(end - start)) / CLOCKS_PER_SEC) * 1000;
     printf("Running time for Bubble Sort is %f ms\n", cpu_time_used);
 
     // Selection Sort
