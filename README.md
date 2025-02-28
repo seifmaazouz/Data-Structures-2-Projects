@@ -1,0 +1,2 @@
+# Data-Structures-2-Projects
+This repository contains the work done by my colleagues and I to fulfill project requirements for the Data Structures 2 Course at Alexandria University, Faculty of Engineering.
