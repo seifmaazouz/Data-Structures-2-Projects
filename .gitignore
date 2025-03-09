@@ -1,0 +1,48 @@
+# CLion CMake build directories
+cmake-build-*/
+
+# CMake-specific files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# Compiled binaries
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.a
+*.lib
+
+# JetBrains IDE-specific files (CLion, IntelliJ)
+.idea/
+*.iml
+
+# User-specific configuration files
+*.swp
+*.swo
+*.DS_Store
+*.vscode/
+*.log
+
+# Debugging files
+*.gch
+*.pch
+*.lprof
+*.gcda
+*.gcno
+*.gcov
+
+# Generated documentation
+/docs/html/
+/docs/latex/
+
+# Git-related files
+.gitignore
