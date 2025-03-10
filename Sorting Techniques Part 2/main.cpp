@@ -1,5 +1,6 @@
 #include <iostream>
 #include "sorting_techniques_part1.h"
+#include "heap_sort.h"
 
 using namespace std;
 
@@ -61,6 +62,14 @@ void measureRuntime(int size) {
     end = clock();
     cpu_time_used = (((double) (end - start)) / CLOCKS_PER_SEC) * 1000;
     printf("Running time for Insertion Sort is %f ms\n", cpu_time_used);
+
+    // Heap Sort
+    memcpy(arrCopy, arr, size * sizeof(int));
+    start = clock();
+    heapSort(arrCopy, size);
+    end = clock();
+    cpu_time_used = (((double) (end - start)) / CLOCKS_PER_SEC) * 1000;
+    printf("Running time for Heap Sort is %f ms\n", cpu_time_used);
 
     delete[] arr;
     delete[] arrCopy;
