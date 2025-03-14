@@ -17,6 +17,9 @@ void merge(int arr[], int low, int mid, int high);
 void quickSort(int arr[], int low, int high);
 int partition(int arr[], int low, int high);
 
+// Hybrid Merge Sort
+void hybridMergeSort(int arr[], int left, int right,int THRESHOLD);
+
 int main() {
     // seed random number generator to get different random numbers each time
     srand(time(nullptr));
@@ -96,6 +99,14 @@ void measureRuntime(int size) {
     cpu_time_used = (((double) (end - start)) / CLOCKS_PER_SEC) * 1000;
     printf("Running time for Quick Sort is %f ms\n", cpu_time_used);
 
+    // Hybrid Merge Sort
+    memcpy(arrCopy, arr, size * sizeof(int));
+    start = clock();
+    hybridMergeSort(arrCopy, 0, size - 1,32);
+    end = clock();
+    cpu_time_used = (((double) (end - start)) / CLOCKS_PER_SEC) * 1000;
+    printf("Running time for Hybrid Merge Sort is %f ms\n", cpu_time_used);
+
     delete[] arr;
     delete[] arrCopy;
 }
@@ -161,4 +172,17 @@ int partition(int arr[], int low, int high) {
     i += 1;
     swap(arr[i], arr[high]);
     return i;
+}
+
+void hybridMergeSort(int arr[], int left, int right,int THRESHOLD) {
+    if (right - left + 1 <= THRESHOLD) {
+        insertionSort(arr + left, right - left + 1);
+        return;
+    }
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        hybridMergeSort(arr, left, mid,THRESHOLD);
+        hybridMergeSort(arr, mid + 1, right,THRESHOLD);
+        merge(arr, left, mid, right);
+    }
 }
