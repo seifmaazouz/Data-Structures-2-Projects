@@ -13,6 +13,10 @@ void printArray(int arr[], int n);
 void mergeSort(int arr[], int low, int high);
 void merge(int arr[], int low, int mid, int high);
 
+// Quick Sort
+void quickSort(int arr[], int low, int high);
+int partition(int arr[], int low, int high);
+
 int main() {
     // seed random number generator to get different random numbers each time
     srand(time(nullptr));
@@ -84,6 +88,14 @@ void measureRuntime(int size) {
     cpu_time_used = (((double) (end - start)) / CLOCKS_PER_SEC) * 1000;
     printf("Running time for Merge Sort is %f ms\n", cpu_time_used);
 
+    // Quick Sort
+    memcpy(arrCopy, arr, size * sizeof(int));
+    start = clock();
+    quickSort(arrCopy, 0, size - 1);
+    end = clock();
+    cpu_time_used = (((double) (end - start)) / CLOCKS_PER_SEC) * 1000;
+    printf("Running time for Quick Sort is %f ms\n", cpu_time_used);
+
     delete[] arr;
     delete[] arrCopy;
 }
@@ -125,4 +137,28 @@ void merge(int arr[], int low, int mid, int high) {
     for (int i = 0; i < size; i++) {
         arr[low + i] = temp[i];
     }
+}
+
+void quickSort(int arr[], int low,int high) {
+    if (low < high) {
+        int pivot = partition(arr,low,high);
+        quickSort(arr,low,pivot-1);
+        quickSort(arr,pivot+1,high);
+    }
+}
+
+int partition(int arr[], int low, int high) {
+    int randomIndex = low + rand() % (high - low + 1);
+    swap(arr[randomIndex], arr[high]);
+    int pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j <= high - 1; j++) {
+        if (arr[j] <= pivot) {
+            i += 1;
+            swap(arr[i], arr[j]);
+        }
+    }
+    i += 1;
+    swap(arr[i], arr[high]);
+    return i;
 }
