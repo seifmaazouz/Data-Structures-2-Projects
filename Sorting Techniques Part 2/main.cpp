@@ -17,10 +17,19 @@ void merge(int arr[], int low, int mid, int high);
 void quickSort(int arr[], int low, int high);
 int partition(int arr[], int low, int high);
 
-// Hybrid Merge Sort
+// Part 2 - Hybrid Merge Sort (Merge Sort with Insertion Sort) and Quick Select (Quick Sort with Selection)
 void hybridMergeSort(int arr[], int left, int right,int THRESHOLD);
+int quickSelect(int arr[], int low, int high, int k);
 
 int main() {
+    // Test the Quick Select function
+    int arr[] = {3, 41, 16, 25, 63, 52, 40};
+    int size = sizeof(arr) / sizeof(arr[0]);
+    int k = 3; // Find the 3rd smallest element
+
+    int kthSmallest = quickSelect(arr, 0, size - 1, k);
+    printf("%dth smallest element is %d\n\n", k, kthSmallest);
+
     // seed random number generator to get different random numbers each time
     srand(time(nullptr));
 
@@ -33,6 +42,24 @@ int main() {
     }
 
     return 0;
+}
+
+int quickSelect(int arr[], int low, int high, int k){
+
+    if(low<=high){
+        int pivot=partition(arr,low,high);
+        //checks if pivot found equals k
+        if(pivot==k-1)
+            return arr[pivot];
+        //checks if k less than pivot takes left subarray
+        if(pivot>k-1)
+            return quickSelect(arr,low,pivot-1,k);
+        //takes the right subarray (bigger than pivot)
+        return quickSelect(arr,pivot+1,high,k);
+    }
+    //error case
+    return -1;
+
 }
 
 int* generateRandArray(int size) {
