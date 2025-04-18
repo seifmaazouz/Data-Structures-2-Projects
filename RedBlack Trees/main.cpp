@@ -183,7 +183,99 @@ public:
     }
 };
 
+RedBlackTree loadDictionary(const string &filename);
+void insertWord(RedBlackTree &tree, const string &word);
+void lookupWord(RedBlackTree &tree, const string &word);
+
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+    RedBlackTree tree = loadDictionary(DICTIONARY_FILE);
+
+    while (true) {
+        cout << "\nChoose an option (1, 2, 3)" << endl;
+        cout << "1. Insert a word" << endl;
+        cout << "2. Lookup a word" << endl;
+        cout << "3. Exit" << endl;
+
+        cout << "Enter your choice: ";
+        int choice;
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                cout << "Enter the word to insert: ";
+                string word;
+                cin >> word;
+                insertWord(tree, word);
+                break;
+            }
+            case 2: {
+                cout << "Enter the word to lookup: ";
+                string word;
+                cin >> word;
+                lookupWord(tree, word);
+                break;
+            }
+            case 3:
+                cout << "Exiting..." << endl;
+                return 0;
+            default:
+                cout << "Invalid choice! Please try again." << endl;
+        }
+    }
+}
+
+
+RedBlackTree loadDictionary(const string &filename) {
+    RedBlackTree tree;
+    ifstream infile(filename);
+    string line;
+    if (!infile) {
+        cerr << "Error: Could not open file '" << filename << "'" << endl;
+        return tree;
+    }
+
+    while (getline(infile, line)) {
+        if (!line.empty()) {
+            if (!tree.search(line))
+                tree.insert(line);
+        }
+    }
+
+    infile.close();
+    cout << "Dictionary loaded successfully!\n" << endl;
+    tree.printTreeSize();
+    tree.printTreeHeight();
+    tree.printBlackHeight();
+
+    return tree;
+}
+
+void insertWord(RedBlackTree &tree, const string &word) {
+    if (tree.search(word)) {
+        cout << "ERROR: Word already in the dictionary!" << endl;
+        return;
+    }
+
+    tree.insert(word);
+
+    ofstream outfile(DICTIONARY_FILE, ios::app);
+    if (outfile.is_open()) {
+        outfile << "\n" << word;
+        cout << "Word inserted successfully!" << endl;
+        outfile.close();
+    } else {
+        cout << "ERROR: Could not open file for writing!" << endl;
+    }
+
+    tree.printTreeSize();
+    tree.printTreeHeight();
+    tree.printBlackHeight();
+}
+
+void lookupWord(RedBlackTree &tree, const string &word) {
+    if (tree.search(word)) {
+        cout << "Word found!" << endl;
+    } else {
+        cout << "Word not found!" << endl;
+    }
 }
