@@ -10,78 +10,83 @@ enum Color { RED, BLACK };
 // Node structure
 struct Node {
     string data;
-    bool color; // RED or BLACK
+    bool color;
     Node* left;
     Node* right;
     Node* parent;
 
-    Node(string data) : data(data), color(RED), left(nullptr), right(nullptr), parent(nullptr) {}
+    Node(string data, Node* nil) : data(data), color(RED), left(nil), right(nil), parent(nil) {}
 };
 
 class RedBlackTree {
 private:
     Node* root;
+    Node* nil; // Shared sentinel node for all null pointers
 
-    // Left rotate at node x
-    void rotateLeft(Node*& root, Node*& x) {
-        Node* y = x->right;
-        x->right = y->left;
-        if (y->left != nullptr)
-            y->left->parent = x;
+    // Rotate left at node
+    void rotateLeft(Node*& root, Node*& z) {
+        Node* rightChild = z->right;
+        z->right = rightChild->left;
 
-        y->parent = x->parent;
-        if (x->parent == nullptr)
-            root = y;
-        else if (x == x->parent->left)
-            x->parent->left = y;
+        if (rightChild->left != nil)
+            rightChild->left->parent = z;
+
+        rightChild->parent = z->parent;
+
+        if (z->parent == nil)
+            root = rightChild;
+        else if (z == z->parent->left)
+            z->parent->left = rightChild;
         else
-            x->parent->right = y;
+            z->parent->right = rightChild;
 
-        y->left = x;
-        x->parent = y;
+        rightChild->left = z;
+        z->parent = rightChild;
     }
 
-    // Right rotate at node y
-    void rotateRight(Node*& root, Node*& y) {
-        Node* x = y->left;
-        y->left = x->right;
-        if (x->right != nullptr)
-            x->right->parent = y;
+    // Rotate right at node
+    void rotateRight(Node*& root, Node*& z) {
+        Node* leftChild = z->left;
+        z->left = leftChild->right;
 
-        x->parent = y->parent;
-        if (y->parent == nullptr)
-            root = x;
-        else if (y == y->parent->left)
-            y->parent->left = x;
+        if (leftChild->right != nil)
+            leftChild->right->parent = z;
+
+        leftChild->parent = z->parent;
+
+        if (z->parent == nil)
+            root = leftChild;
+        else if (z == z->parent->left)
+            z->parent->left = leftChild;
         else
-            y->parent->right = x;
+            z->parent->right = leftChild;
 
-        x->right = y;
-        y->parent = x;
+        leftChild->right = z;
+        z->parent = leftChild;
     }
 
     // Fix Red-Black Tree after insertion
     void fixViolation(Node*& root, Node*& z) {
-        while (z != root && z->parent->color == RED) {
+        while (z->parent->color == RED) {
             Node* parent = z->parent;
             Node* grandparent = parent->parent;
 
             if (parent == grandparent->left) {
                 Node* uncle = grandparent->right;
 
-                if (uncle != nullptr && uncle->color == RED) {
-                    // Case 1: Uncle is red - recolor
+                if (uncle->color == RED) {
+                    // Case 1: Uncle is red → recolor and move up
                     parent->color = BLACK;
                     uncle->color = BLACK;
                     grandparent->color = RED;
                     z = grandparent;
                 } else {
                     if (z == parent->right) {
-                        // Case 2: z is right child - rotate left
+                        // Case 2: node is right child → rotate to become left child
                         z = parent;
                         rotateLeft(root, z);
                     }
-                    // Case 3: z is left child - rotate right
+                    // Case 3: node is left child → rotate right and recolor
                     parent = z->parent;
                     grandparent = parent->parent;
                     parent->color = BLACK;
@@ -89,22 +94,22 @@ private:
                     rotateRight(root, grandparent);
                 }
             } else {
-                // Mirror case: parent is right child
+                // Mirror case (parent is right child of grandparent)
                 Node* uncle = grandparent->left;
 
-                if (uncle != nullptr && uncle->color == RED) {
-                    // Case 1: Uncle is red - recolor
+                if (uncle->color == RED) {
+                    // Case 1
                     parent->color = BLACK;
                     uncle->color = BLACK;
                     grandparent->color = RED;
                     z = grandparent;
                 } else {
                     if (z == parent->left) {
-                        // Case 2: z is left child - rotate right
+                        // Case 2
                         z = parent;
                         rotateRight(root, z);
                     }
-                    // Case 3: z is right child - rotate left
+                    // Case 3
                     parent = z->parent;
                     grandparent = parent->parent;
                     parent->color = BLACK;
@@ -113,52 +118,55 @@ private:
                 }
             }
         }
-
-        root->color = BLACK;
+        root->color = BLACK; // Root must always be black
     }
 
-    // BST insert helper
-    Node* BSTInsert(Node* root, Node* z) {
-        if (root == nullptr)
-            return z;
+    // Standard BST insert
+    Node* BSTInsert(Node* current, Node* newNode) {
+        if (current == nil)
+            return newNode;
 
-        if (strcasecmp(z->data.c_str(), root->data.c_str()) < 0) {
-            root->left = BSTInsert(root->left, z);
-            root->left->parent = root;
-        } else if (strcasecmp(z->data.c_str(), root->data.c_str()) > 0) {
-            root->right = BSTInsert(root->right, z);
-            root->right->parent = root;
+        if (strcasecmp(newNode->data.c_str(), current->data.c_str()) < 0) {
+            current->left = BSTInsert(current->left, newNode);
+            current->left->parent = current;
+        } else if (strcasecmp(newNode->data.c_str(), current->data.c_str()) > 0) {
+            current->right = BSTInsert(current->right, newNode);
+            current->right->parent = current;
         }
 
-        return root;
+        return current;
     }
 
-    // Inorder traversal
+    // Inorder traversal to print sorted words
     void inorder(Node* node) {
-        if (node == nullptr) return;
+        if (node == nil) return;
         inorder(node->left);
         cout << node->data << " ";
         inorder(node->right);
     }
 
+    // Get total height of tree
     int getHeight(Node* node) {
-        if (node == nullptr) return 0;
+        if (node == nil) return 0;
         return 1 + max(getHeight(node->left), getHeight(node->right));
     }
 
+    // Get black height (number of black nodes along a path)
     int getBlackHeight(Node* node) {
-        if (node == nullptr) return 0;
+        if (node == nil) return 0;
         int left = getBlackHeight(node->left);
         return left + (node->color == BLACK ? 1 : 0);
     }
 
+    // Count total nodes
     int countNodes(Node* node) {
-        if (node == nullptr) return 0;
+        if (node == nil) return 0;
         return 1 + countNodes(node->left) + countNodes(node->right);
     }
 
+    // Search for a word
     Node* searchNode(Node* node, const string& key) {
-        if (node == nullptr || strcasecmp(node->data.c_str(), key.c_str()) == 0)
+        if (node == nil || strcasecmp(node->data.c_str(), key.c_str()) == 0)
             return node;
 
         if (strcasecmp(key.c_str(), node->data.c_str()) < 0)
@@ -168,18 +176,28 @@ private:
     }
 
 public:
-    RedBlackTree() : root(nullptr) {}
+    RedBlackTree() {
+        // Initialize nil node
+        nil = new Node("", nullptr);
+        nil->color = BLACK;
+        nil->left = nil->right = nil->parent = nil;
 
+        root = nil;
+    }
+
+    // Insert a new word
     void insert(const string &data) {
-        Node* z = new Node(data);
-        root = BSTInsert(root, z);
-        fixViolation(root, z);
+        Node* newNode = new Node(data, nil);
+        root = BSTInsert(root, newNode);
+        fixViolation(root, newNode);
     }
 
+    // Search for a word
     bool search(const string& key) {
-        return searchNode(root, key) != nullptr;
+        return searchNode(root, key) != nil;
     }
 
+    // Print tree properties
     void printTreeHeight() {
         cout << "Tree Height: " << getHeight(root) << endl;
     }
