@@ -2,7 +2,8 @@
 #include <algorithm>
 #include <fstream>
 #include <string>
-#include <cctype>
+#include <cstring>
+
 using namespace std;
 
 const string DICTIONARY_FILE = "../Dictionary.txt";
@@ -116,10 +117,10 @@ private:
         if (root == nullptr)
             return pt;
 
-        if (pt->data < root->data) {
+        if (strcasecmp(pt->data.c_str(), root->data.c_str()) < 0) {
             root->left = BSTInsert(root->left, pt);
             root->left->parent = root;
-        } else if (pt->data > root->data) {
+        } else if (strcasecmp(pt->data.c_str(), root->data.c_str()) > 0) {
             root->right = BSTInsert(root->right, pt);
             root->right->parent = root;
         }
@@ -144,8 +145,9 @@ private:
     }
 
     Node* searchNode(Node* node, const string& key) {
-        if (node == nullptr || node->data == key) return node;
-        if (key < node->data)
+        if (node == nullptr || strcasecmp(node->data.c_str(), key.c_str()) == 0)
+            return node;
+        if (strcasecmp(key.c_str(), node->data.c_str()) < 0)
             return searchNode(node->left, key);
         else
             return searchNode(node->right, key);
@@ -223,7 +225,6 @@ int main() {
         }
     }
 }
-
 
 RedBlackTree loadDictionary(const string &filename) {
     RedBlackTree tree;
