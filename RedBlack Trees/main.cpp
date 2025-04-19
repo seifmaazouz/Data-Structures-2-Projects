@@ -1,183 +1,226 @@
 #include <iostream>
-#include <algorithm>
 #include <fstream>
 #include <string>
 #include <cstring>
-
 using namespace std;
 
 const string DICTIONARY_FILE = "../Dictionary.txt";
 enum Color { RED, BLACK };
 
+// Node structure
 struct Node {
     string data;
     bool color;
-    Node *left, *right, *parent;
+    Node* left;
+    Node* right;
+    Node* parent;
 
-    Node(string data): data(data), color(RED), left(nullptr), right(nullptr), parent(nullptr) {}
+    Node(string data, Node* nil) : data(data), color(RED), left(nil), right(nil), parent(nil) {}
 };
 
 class RedBlackTree {
 private:
     Node* root;
+    Node* nil;
 
-    void rotateLeft(Node*& root, Node*& pt) {
-        Node* pt_right = pt->right;
-        pt->right = pt_right->left;
-        if (pt->right != nullptr)
-            pt->right->parent = pt;
+    // Rotate left at a particular node
+    void rotateLeft(Node*& root, Node*& z) {
+        Node* rightChild = z->right;
+        z->right = rightChild->left;
 
-        pt_right->parent = pt->parent;
-        if (pt->parent == nullptr)
-            root = pt_right;
-        else if (pt == pt->parent->left)
-            pt->parent->left = pt_right;
+        if (rightChild->left != nil)
+            rightChild->left->parent = z;
+
+        rightChild->parent = z->parent;
+
+        if (z->parent == nil)
+            root = rightChild;
+        else if (z == z->parent->left)
+            z->parent->left = rightChild;
         else
-            pt->parent->right = pt_right;
+            z->parent->right = rightChild;
 
-        pt_right->left = pt;
-        pt->parent = pt_right;
+        rightChild->left = z;
+        z->parent = rightChild;
     }
 
-    void rotateRight(Node*& root, Node*& pt) {
-        Node* pt_left = pt->left;
-        pt->left = pt_left->right;
-        if (pt->left != nullptr)
-            pt->left->parent = pt;
+    // Rotate right at a particular node
+    void rotateRight(Node*& root, Node*& z) {
+        Node* leftChild = z->left;
+        z->left = leftChild->right;
 
-        pt_left->parent = pt->parent;
-        if (pt->parent == nullptr)
-            root = pt_left;
-        else if (pt == pt->parent->left)
-            pt->parent->left = pt_left;
+        if (leftChild->right != nil)
+            leftChild->right->parent = z;
+
+        leftChild->parent = z->parent;
+
+        if (z->parent == nil)
+            root = leftChild;
+        else if (z == z->parent->left)
+            z->parent->left = leftChild;
         else
-            pt->parent->right = pt_left;
+            z->parent->right = leftChild;
 
-        pt_left->right = pt;
-        pt->parent = pt_left;
+        leftChild->right = z;
+        z->parent = leftChild;
     }
 
-    void fixViolation(Node*& root, Node*& pt) {
-        Node* parent_pt = nullptr;
-        Node* grand_parent_pt = nullptr;
+    // Fix Red-Black Tree after insertion
+    void fixViolation(Node*& root, Node*& z) {
+        // Base case: If z is root or parent is black, stop
+        if (z == root || z->parent->color == BLACK) {
+            root->color = BLACK;
+            return;
+        }
 
-        while ((pt != root) && (pt->color != BLACK) && (pt->parent->color == RED)) {
-            parent_pt = pt->parent;
-            grand_parent_pt = pt->parent->parent;
+        Node* parent = z->parent;
+        Node* grandparent = parent->parent;
 
-            if (parent_pt == grand_parent_pt->left) {
-                Node* uncle_pt = grand_parent_pt->right;
+        // If parent is left child of grandparent
+        if (parent == grandparent->left) {
+            Node* uncle = grandparent->right;
 
-                if (uncle_pt != nullptr && uncle_pt->color == RED) {
-                    grand_parent_pt->color = RED;
-                    parent_pt->color = BLACK;
-                    uncle_pt->color = BLACK;
-                    pt = grand_parent_pt;
-                } else {
-                    if (pt == parent_pt->right) {
-                        rotateLeft(root, parent_pt);
-                        pt = parent_pt;
-                        parent_pt = pt->parent;
-                    }
-                    rotateRight(root, grand_parent_pt);
-                    swap(parent_pt->color, grand_parent_pt->color);
-                    pt = parent_pt;
-                }
+            if (uncle->color == RED) {
+                // Case 1: Recolor parent, uncle, grandparent and recurse up
+                parent->color = BLACK;
+                uncle->color = BLACK;
+                grandparent->color = RED;
+                fixViolation(root, grandparent);
             } else {
-                Node* uncle_pt = grand_parent_pt->left;
-
-                if ((uncle_pt != nullptr) && (uncle_pt->color == RED)) {
-                    grand_parent_pt->color = RED;
-                    parent_pt->color = BLACK;
-                    uncle_pt->color = BLACK;
-                    pt = grand_parent_pt;
-                } else {
-                    if (pt == parent_pt->left) {
-                        rotateRight(root, parent_pt);
-                        pt = parent_pt;
-                        parent_pt = pt->parent;
-                    }
-                    rotateLeft(root, grand_parent_pt);
-                    swap(parent_pt->color, grand_parent_pt->color);
-                    pt = parent_pt;
+                // Case 2 & 3 where uncle is black
+                if (z == parent->right) {
+                    // Case 2: z is right child of parent
+                    z = parent;
+                    rotateLeft(root, z);
                 }
+                // Case 3: z is left child of parent
+                parent = z->parent;
+                grandparent = parent->parent;
+                parent->color = BLACK;
+                grandparent->color = RED;
+                rotateRight(root, grandparent);
+            }
+        } else {
+            // Mirror case: If parent is right child of grandparent
+            Node* uncle = grandparent->left;
+
+            if (uncle->color == RED) {
+                // Case 1: Recolor parent,uncle,grandparent and recurse up
+                parent->color = BLACK;
+                uncle->color = BLACK;
+                grandparent->color = RED;
+                fixViolation(root, grandparent);
+            } else {
+                // Case 2 & 3 where uncle is black
+                if (z == parent->left) {
+                    // Case 2: z is left child of parent
+                    z = parent;
+                    rotateRight(root, z);
+                }
+                // Case 3: z is right child of parent
+                parent = z->parent;
+                grandparent = parent->parent;
+                parent->color = BLACK;
+                grandparent->color = RED;
+                rotateLeft(root, grandparent);
             }
         }
-        root->color = BLACK;
+
+        root->color = BLACK; // Ensure root is black after fix
     }
 
-    void inorder(Node* root) {
-        if (root == nullptr) return;
-        inorder(root->left);
-        cout << root->data << " ";
-        inorder(root->right);
-    }
-
-    Node* BSTInsert(Node* root, Node* pt) {
-        if (root == nullptr)
-            return pt;
-
-        if (strcasecmp(pt->data.c_str(), root->data.c_str()) < 0) {
-            root->left = BSTInsert(root->left, pt);
-            root->left->parent = root;
-        } else if (strcasecmp(pt->data.c_str(), root->data.c_str()) > 0) {
-            root->right = BSTInsert(root->right, pt);
-            root->right->parent = root;
+    // Standard BST insert
+    Node* BSTInsert(Node* current, Node* newNode) {
+        if (current == nil)
+            return newNode;
+        //Go left
+        if (strcasecmp(newNode->data.c_str(), current->data.c_str()) < 0) {
+            current->left = BSTInsert(current->left, newNode);
+            current->left->parent = current;
+        }
+        //Go right
+        else if (strcasecmp(newNode->data.c_str(), current->data.c_str()) > 0) {
+            current->right = BSTInsert(current->right, newNode);
+            current->right->parent = current;
         }
 
-        return root;
+        return current;
     }
 
+    // Inorder traversal to print sorted words
+    void inorder(Node* node) {
+        if (node == nil) return;
+        inorder(node->left);
+        cout << node->data << " ";
+        inorder(node->right);
+    }
+
+    // Get total height of tree
     int getHeight(Node* node) {
-        if (node == nullptr) return 0;
+        if (node == nil) return 0;
         return 1 + max(getHeight(node->left), getHeight(node->right));
     }
 
+    // Get black height (number of black nodes along a path)
     int getBlackHeight(Node* node) {
-        if (node == nullptr) return 0;
-        int leftHeight = getBlackHeight(node->left);
-        return leftHeight + (node->color == BLACK ? 1 : 0);
+        if (node == nil) return 0;
+        int left = getBlackHeight(node->left);
+        return left + (node->color == BLACK ? 1 : 0);
     }
 
+    // Count total nodes
     int countNodes(Node* node) {
-        if (node == nullptr) return 0;
+        if (node == nil) return 0;
         return 1 + countNodes(node->left) + countNodes(node->right);
     }
 
+    // Search for a word
     Node* searchNode(Node* node, const string& key) {
-        if (node == nullptr || strcasecmp(node->data.c_str(), key.c_str()) == 0)
+        if (node == nil || strcasecmp(node->data.c_str(), key.c_str()) == 0)
             return node;
+        //Go left
         if (strcasecmp(key.c_str(), node->data.c_str()) < 0)
             return searchNode(node->left, key);
-        else
-            return searchNode(node->right, key);
+        //Go right
+        else return searchNode(node->right, key);
     }
 
 public:
-    RedBlackTree() : root(nullptr) {}
+    RedBlackTree() {
+        // Initialize nil node
+        nil = new Node("", nullptr);
+        nil->color = BLACK;
+        nil->left = nil->right = nil->parent = nil;
+        root = nil;
+    }
 
+    // Insert a new word in RB tree
     void insert(const string &data) {
-        Node* pt = new Node(data);
-        root = BSTInsert(root, pt);
-        fixViolation(root, pt);
+        Node* newNode = new Node(data, nil);
+        root = BSTInsert(root, newNode);
+        fixViolation(root, newNode);
     }
 
+    // Search for a word
     bool search(const string& key) {
-        return searchNode(root, key) != nullptr;
+        return searchNode(root, key) != nil;
     }
 
+    // Print tree Height
     void printTreeHeight() {
         cout << "Tree Height: " << getHeight(root) << endl;
     }
-
+    //Print tree Black Height
     void printBlackHeight() {
         cout << "Black Height: " << getBlackHeight(root) << endl;
     }
 
+    //Print tree size
     void printTreeSize() {
         cout << "Tree Size: " << countNodes(root) << endl;
     }
 
+    //Print sorted tree
     void printInorder() {
         cout << "Inorder Traversal: ";
         inorder(root);
@@ -185,9 +228,60 @@ public:
     }
 };
 
-RedBlackTree loadDictionary(const string &filename);
-void insertWord(RedBlackTree &tree, const string &word);
-void lookupWord(RedBlackTree &tree, const string &word);
+// Load dictionary from file into Tree
+RedBlackTree loadDictionary(const string &filename) {
+    RedBlackTree tree;
+    ifstream infile(filename);
+    string line;
+
+    if (!infile) {
+        cerr << "Error: Could not open file '" << filename << "'" << endl;
+        return tree;
+    }
+
+    while (getline(infile, line)) {
+        if (!line.empty()) {
+            tree.insert(line);
+        }
+    }
+
+    infile.close();
+    cout << "Dictionary loaded successfully!\n" << endl;
+    tree.printTreeSize();
+    tree.printTreeHeight();
+    tree.printBlackHeight();
+    return tree;
+}
+//Insert a word in tree and update the txt file
+void insertWord(RedBlackTree &tree, const string &word) {
+    if (tree.search(word)) {
+        cout << "ERROR: Word already in the dictionary!" << endl;
+        return;
+    }
+
+    tree.insert(word);
+
+    ofstream outfile(DICTIONARY_FILE, ios::app);
+    if (outfile.is_open()) {
+        outfile << "\n" << word;
+        cout << "Word inserted successfully!" << endl;
+        outfile.close();
+    } else {
+        cout << "ERROR: Could not open file for writing!" << endl;
+    }
+
+    tree.printTreeSize();
+    tree.printTreeHeight();
+    tree.printBlackHeight();
+}
+//Search for a word in the Tree
+void lookupWord(RedBlackTree &tree, const string &word) {
+    if (tree.search(word)) {
+        cout << "YES" << endl;
+    } else {
+        cout << "NO" << endl;
+    }
+}
 
 int main() {
     RedBlackTree tree = loadDictionary(DICTIONARY_FILE);
@@ -223,60 +317,5 @@ int main() {
             default:
                 cout << "Invalid choice! Please try again." << endl;
         }
-    }
-}
-
-RedBlackTree loadDictionary(const string &filename) {
-    RedBlackTree tree;
-    ifstream infile(filename);
-    string line;
-    if (!infile) {
-        cerr << "Error: Could not open file '" << filename << "'" << endl;
-        return tree;
-    }
-
-    while (getline(infile, line)) {
-        if (!line.empty()) {
-            if (!tree.search(line))
-                tree.insert(line);
-        }
-    }
-
-    infile.close();
-    cout << "Dictionary loaded successfully!\n" << endl;
-    tree.printTreeSize();
-    tree.printTreeHeight();
-    tree.printBlackHeight();
-
-    return tree;
-}
-
-void insertWord(RedBlackTree &tree, const string &word) {
-    if (tree.search(word)) {
-        cout << "ERROR: Word already in the dictionary!" << endl;
-        return;
-    }
-
-    tree.insert(word);
-
-    ofstream outfile(DICTIONARY_FILE, ios::app);
-    if (outfile.is_open()) {
-        outfile << "\n" << word;
-        cout << "Word inserted successfully!" << endl;
-        outfile.close();
-    } else {
-        cout << "ERROR: Could not open file for writing!" << endl;
-    }
-
-    tree.printTreeSize();
-    tree.printTreeHeight();
-    tree.printBlackHeight();
-}
-
-void lookupWord(RedBlackTree &tree, const string &word) {
-    if (tree.search(word)) {
-        cout << "Word found!" << endl;
-    } else {
-        cout << "Word not found!" << endl;
     }
 }
