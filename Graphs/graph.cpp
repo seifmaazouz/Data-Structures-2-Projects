@@ -111,5 +111,6 @@ void Graph::print() {
         for (int j : adjList[i]) {
             cout << j << " -> ";
         }
+        cout << endl;
     }
 }
