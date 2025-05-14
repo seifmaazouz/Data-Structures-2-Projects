@@ -1,22 +1,21 @@
 #ifndef GRAPH_H
 #define GRAPH_H
-#include <vector>
 
-using namespace std;
+#include <vector>
 
 class Graph {
 private:
-    vector<vector<int>> adjList;
+    std::vector<std::vector<int>> adjList;
     bool isDirected;
 
-    void DFSHelper(int start, vector<bool>& visited);
-    void BFSHelper(int start, vector<bool>& visited);
+    void DFSHelper(int start, std::vector<bool>& visited);
+    void BFSHelper(int start, std::vector<bool>& visited);
 
 public:
     Graph(int vertices, bool isDirected = false);
 
     int size();
-    vector<int> getAdjList(int index);
+    std::vector<int> getAdjList(int index);
     void addEdge(int src, int dst);
 
     void DFS(int start);

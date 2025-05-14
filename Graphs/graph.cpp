@@ -69,18 +69,21 @@ void Graph::BFSHelper(int start, vector<bool>& visited) {
     }
 }
 
+// DFS from a specific node
 void Graph::DFS(int start) {
     vector<bool> visited(adjList.size(), false);
     DFSHelper(start, visited);
     cout << endl;
 }
 
+// BFS from a specific node
 void Graph::BFS(int start) {
     vector<bool> visited(adjList.size(), false);
     BFSHelper(start, visited);
     cout << endl;
 }
 
+// DFS across all components (useful for disconnected graphs)
 void Graph::DFSAll() {
     vector<bool> visited(adjList.size(), false);
     for (int i = 0; i < adjList.size(); i++) {
@@ -91,6 +94,7 @@ void Graph::DFSAll() {
     cout << endl;
 }
 
+// BFS across all components (useful for disconnected graphs)
 void Graph::BFSAll() {
     vector<bool> visited(adjList.size(), false);
     for (int i = 0; i < adjList.size(); i++) {
@@ -107,6 +111,5 @@ void Graph::print() {
         for (int j : adjList[i]) {
             cout << j << " -> ";
         }
-        cout << endl;
     }
 }
